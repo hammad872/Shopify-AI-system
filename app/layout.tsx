@@ -4,7 +4,7 @@ import Providers from '@/components/Providers';
 import { display, sans, mono } from '@/lib/fonts';
 
 export const metadata: Metadata = {
-  title: 'StorePilot AI — Tell Shopify what to do.',
+  title: 'Mareura — The AI Command Center for Shopify',
   description:
     'Run your Shopify store in plain English. Say what you want, review the plan, approve — done.',
 };

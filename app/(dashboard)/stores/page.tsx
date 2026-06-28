@@ -21,7 +21,7 @@ export default async function StoresPage() {
   }));
 
   return (
-    <Suspense fallback={<div className="text-muted">Loading…</div>}>
+    <Suspense fallback={<div className="text-mist/50">Loading…</div>}>
       <StoresClient stores={initialStores} />
     </Suspense>
   );

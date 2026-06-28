@@ -7,6 +7,55 @@ import { planFromMessage } from '@/lib/agents';
 import { consumeAiRequest } from '@/lib/usage';
 import { scoped } from '@/lib/db/scope';
 import { getActiveStoreId } from '@/lib/shopify/store-service';
+import type { IPlan, PlanStatus } from '@/models/Message';
+
+export type ConversationSummary = {
+  id: string;
+  title: string;
+  lastMessageAt: string;
+};
+
+export type StoredChatMessage = {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  plan?: IPlan;
+  status?: PlanStatus;
+};
+
+/** List recent conversations for the sidebar. */
+export async function listConversations(): Promise<ConversationSummary[]> {
+  const ctx = await requireOrg();
+  await connectDB();
+  const convos = await Conversation.find(scoped(ctx.organizationId, { userId: ctx.userId }))
+    .sort({ lastMessageAt: -1 })
+    .limit(50)
+    .select('title lastMessageAt')
+    .lean();
+  return convos.map((c) => ({
+    id: c._id.toString(),
+    title: c.title,
+    lastMessageAt: c.lastMessageAt.toISOString(),
+  }));
+}
+
+/** Load all messages for a conversation. */
+export async function getConversationMessages(conversationId: string): Promise<StoredChatMessage[] | null> {
+  const ctx = await requireOrg();
+  await connectDB();
+  const convo = await Conversation.findOne(scoped(ctx.organizationId, { _id: conversationId, userId: ctx.userId }));
+  if (!convo) return null;
+  const messages = await Message.find(scoped(ctx.organizationId, { conversationId }))
+    .sort({ createdAt: 1 })
+    .lean();
+  return messages.map((m) => ({
+    id: m._id.toString(),
+    role: m.role as 'user' | 'assistant',
+    content: m.content,
+    plan: m.plan,
+    status: m.planStatus !== 'none' ? m.planStatus : undefined,
+  }));
+}
 
 /**
  * Handle a merchant message: persist it, run the read-only pipeline, and

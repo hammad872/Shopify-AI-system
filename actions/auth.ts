@@ -2,12 +2,18 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import mongoose from 'mongoose';
-import { connectDB } from '@/lib/db/connect';
+import { connectDB, dbConnectionHelpMessage, isDbConnectionError } from '@/lib/db/connect';
 import { User } from '@/models/User';
 import { Organization } from '@/models/Organization';
 
 export async function signup(input: { name: string; email: string; password: string }) {
-  await connectDB();
+  try {
+    await connectDB();
+  } catch (err) {
+    if (isDbConnectionError(err)) return { ok: false, error: dbConnectionHelpMessage() };
+    throw err;
+  }
+
   const email = input.email.toLowerCase().trim();
   const existing = await User.findOne({ email });
   if (existing) return { ok: false, error: 'An account with this email already exists.' };
@@ -15,7 +21,6 @@ export async function signup(input: { name: string; email: string; password: str
   const passwordHash = await bcrypt.hash(input.password, 12);
   const verificationToken = crypto.randomBytes(32).toString('hex');
 
-  // User + Organization must be created together — transaction keeps them consistent.
   const session = await mongoose.startSession();
   try {
     let userId = '';
@@ -26,10 +31,10 @@ export async function signup(input: { name: string; email: string; password: str
           email,
           passwordHash,
           provider: 'credentials',
-          emailVerified: false,
+          emailVerified: true,
           verificationToken,
           verificationTokenExpiry: new Date(Date.now() + 1000 * 60 * 60 * 24),
-          organizationId: new mongoose.Types.ObjectId(), // placeholder, set below
+          organizationId: new mongoose.Types.ObjectId(),
         }],
         { session }
       );
@@ -41,7 +46,6 @@ export async function signup(input: { name: string; email: string; password: str
       await user.save({ session });
       userId = user._id.toString();
     });
-    // TODO: send verification email containing verificationToken (Phase 3 email service).
     return { ok: true, userId, verificationToken };
   } catch (err) {
     return { ok: false, error: (err as Error).message };

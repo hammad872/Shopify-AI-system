@@ -3,6 +3,7 @@ import { User } from '@/models/User';
 import { Store } from '@/models/Store';
 import { Subscription } from '@/models/Subscription';
 import { AuditLog } from '@/models/AuditLog';
+import { Users, Store as StoreIcon, CreditCard, AlertTriangle } from 'lucide-react';
 
 export default async function AdminHome() {
   await connectDB();
@@ -12,24 +13,34 @@ export default async function AdminHome() {
     Subscription.countDocuments({ status: 'active' }),
     AuditLog.countDocuments({ result: 'failure' }),
   ]);
+
+  const stats = [
+    { label: 'Users', value: users, icon: Users },
+    { label: 'Active stores', value: stores, icon: StoreIcon },
+    { label: 'Active subscriptions', value: activeSubs, icon: CreditCard },
+    { label: 'Execution failures', value: failures, icon: AlertTriangle },
+  ];
+
   return (
     <div>
-      <h1 className="app-page-title">Admin</h1>
+      <p className="font-mono text-xs uppercase tracking-[0.2em] text-amber-400/80">Platform</p>
+      <h1 className="app-page-title mt-1">Admin</h1>
       <p className="app-page-subtitle">Platform overview and metrics.</p>
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { label: 'Users', value: users },
-          { label: 'Active stores', value: stores },
-          { label: 'Active subscriptions', value: activeSubs },
-          { label: 'Execution failures', value: failures },
-        ].map((s) => (
-          <div key={s.label} className="app-stat-card">
-            <p className="text-sm text-fog/50">{s.label}</p>
-            <p className="mt-1 font-display text-2xl font-bold">{s.value}</p>
-          </div>
-        ))}
+        {stats.map((s) => {
+          const Icon = s.icon;
+          return (
+            <div key={s.label} className="app-stat-card">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-mist/50">{s.label}</p>
+                <Icon size={16} className="text-amber-400/60" />
+              </div>
+              <p className="mt-2 font-display text-2xl font-bold text-mist">{s.value}</p>
+            </div>
+          );
+        })}
       </div>
-      <p className="mt-6 text-sm text-fog/45">Extend with revenue (from Stripe), per-org AI usage, and a paginated audit-log table.</p>
+      <p className="mt-6 text-sm text-mist/45">Extend with revenue (from Stripe), per-org AI usage, and a paginated audit-log table.</p>
     </div>
   );
 }
