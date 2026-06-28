@@ -1,15 +1,17 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import Providers from '@/components/Providers';
+import { display, sans, mono } from '@/lib/fonts';
 
 export const metadata: Metadata = {
-  title: 'StorePilot AI — Manage your Shopify store through chat',
-  description: 'Connect your Shopify store and run operations with natural language.',
+  title: 'StorePilot AI — Tell Shopify what to do.',
+  description:
+    'Run your Shopify store in plain English. Say what you want, review the plan, approve — done.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
       <body><Providers>{children}</Providers></body>
     </html>
   );

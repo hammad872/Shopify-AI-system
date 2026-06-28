@@ -16,19 +16,30 @@ export default function Signup() {
     else setDone(true);
   }
 
-  if (done) return <main className="mx-auto max-w-sm px-6 py-24"><h1 className="text-2xl font-semibold">Check your email</h1><p className="mt-3 text-muted">We sent a verification link. (Wire up the email service in Phase 3.)</p><Link href="/login" className="mt-4 inline-block text-brand">Back to login</Link></main>;
+  if (done) {
+    return (
+      <>
+        <h1 className="app-page-title">Check your email</h1>
+        <p className="app-page-subtitle">We sent a verification link. Open it to activate your account.</p>
+        <Link href="/login" className="app-btn-primary mt-6 inline-block w-full text-center">Back to login</Link>
+      </>
+    );
+  }
 
   return (
-    <main className="mx-auto max-w-sm px-6 py-24">
-      <h1 className="text-2xl font-semibold">Create your account</h1>
-      {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+    <>
+      <h1 className="app-page-title">Create your account</h1>
+      <p className="app-page-subtitle">Connect your store and start running commands in minutes.</p>
+      {error && <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p>}
       <div className="mt-6 space-y-3">
-        <input className="w-full rounded-lg border border-border bg-surface px-3 py-2" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-        <input className="w-full rounded-lg border border-border bg-surface px-3 py-2" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-        <input className="w-full rounded-lg border border-border bg-surface px-3 py-2" placeholder="Password (8+ chars)" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-        <button onClick={submit} className="w-full rounded-lg bg-brand px-4 py-2 font-medium">Sign up</button>
+        <input className="app-input" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+        <input className="app-input" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+        <input className="app-input" placeholder="Password (8+ chars)" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && submit()} />
+        <button onClick={submit} className="app-btn-primary w-full">Sign up</button>
       </div>
-      <p className="mt-4 text-sm text-muted">Have an account? <Link href="/login" className="text-brand">Log in</Link></p>
-    </main>
+      <p className="mt-6 text-center text-sm text-fog/50">
+        Have an account? <Link href="/login" className="app-link">Log in</Link>
+      </p>
+    </>
   );
 }

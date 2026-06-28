@@ -14,21 +14,22 @@ export default async function AdminHome() {
   ]);
   return (
     <div>
-      <h1 className="text-2xl font-semibold">Admin</h1>
-      <div className="mt-6 grid gap-4 sm:grid-cols-4">
+      <h1 className="app-page-title">Admin</h1>
+      <p className="app-page-subtitle">Platform overview and metrics.</p>
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: 'Users', value: users },
           { label: 'Active stores', value: stores },
           { label: 'Active subscriptions', value: activeSubs },
           { label: 'Execution failures', value: failures },
         ].map((s) => (
-          <div key={s.label} className="rounded-xl border border-border bg-surface p-5">
-            <p className="text-sm text-muted">{s.label}</p>
-            <p className="mt-1 text-2xl font-semibold">{s.value}</p>
+          <div key={s.label} className="app-stat-card">
+            <p className="text-sm text-fog/50">{s.label}</p>
+            <p className="mt-1 font-display text-2xl font-bold">{s.value}</p>
           </div>
         ))}
       </div>
-      <p className="mt-6 text-sm text-muted">Extend with revenue (from Stripe), per-org AI usage, and a paginated audit-log table.</p>
+      <p className="mt-6 text-sm text-fog/45">Extend with revenue (from Stripe), per-org AI usage, and a paginated audit-log table.</p>
     </div>
   );
 }

@@ -2,31 +2,26 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSessionContext } from '@/lib/auth-helpers';
 import SignOutButton from '@/components/SignOutButton';
-
-const nav = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/chat', label: 'AI Chat' },
-  { href: '/stores', label: 'Stores' },
-  { href: '/audit', label: 'Store Audit' },
-  { href: '/billing', label: 'Billing' },
-];
+import { SidebarNav } from '@/components/app/SidebarNav';
+import { Logo } from '@/components/marketing/Logo';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getSessionContext();
   if (!ctx) redirect('/login');
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-56 shrink-0 border-r border-border bg-surface p-4">
-        <p className="px-2 font-semibold text-brand">StorePilot AI</p>
-        <nav className="mt-6 space-y-1">
-          {nav.map((n) => (
-            <Link key={n.href} href={n.href} className="block rounded-lg px-2 py-1.5 text-sm text-muted hover:bg-border hover:text-white">{n.label}</Link>
-          ))}
-          {ctx.role === 'superadmin' && <Link href="/admin" className="block rounded-lg px-2 py-1.5 text-sm text-amber-400 hover:bg-border">Admin</Link>}
-        </nav>
-        <div className="mt-8 px-2"><SignOutButton /></div>
+    <div className="flex min-h-screen bg-navy font-sans text-fog antialiased">
+      <aside className="flex w-60 shrink-0 flex-col border-r border-white/8 bg-[#0E1730]/80 p-4 backdrop-blur-xl">
+        <Link href="/dashboard" className="flex items-center gap-2.5 px-2">
+          <Logo className="h-8 w-8" />
+          <span className="font-display text-lg font-bold tracking-tight">StorePilot</span>
+        </Link>
+        <SidebarNav isAdmin={ctx.role === 'superadmin'} />
+        <div className="mt-auto border-t border-white/8 px-2 pt-4">
+          <p className="truncate text-xs text-fog/40">{ctx.email}</p>
+          <SignOutButton />
+        </div>
       </aside>
-      <main className="flex-1 p-8">{children}</main>
+      <main className="flex-1 overflow-hidden p-6 lg:p-8">{children}</main>
     </div>
   );
 }

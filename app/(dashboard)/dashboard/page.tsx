@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { connectDB } from '@/lib/db/connect';
 import { requireOrg } from '@/lib/auth-helpers';
 import { Store } from '@/models/Store';
@@ -5,9 +6,9 @@ import { scoped } from '@/lib/db/scope';
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-xl border border-border bg-surface p-5">
-      <p className="text-sm text-muted">{label}</p>
-      <p className="mt-1 text-2xl font-semibold">{value}</p>
+    <div className="app-stat-card">
+      <p className="text-sm text-fog/50">{label}</p>
+      <p className="mt-1 font-display text-2xl font-bold">{value}</p>
     </div>
   );
 }
@@ -19,11 +20,11 @@ export default async function Dashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
+      <h1 className="app-page-title">Dashboard</h1>
       {store ? (
         <>
-          <p className="mt-1 text-muted">{store.shopDomain}</p>
-          <div className="mt-6 grid gap-4 sm:grid-cols-4">
+          <p className="app-page-subtitle font-mono text-sky">{store.shopDomain}</p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Stat label="Products" value={store.productCount} />
             <Stat label="Inventory units" value={store.inventoryCount} />
             <Stat label="Health score" value={`${store.healthScore}/100`} />
@@ -31,7 +32,12 @@ export default async function Dashboard() {
           </div>
         </>
       ) : (
-        <p className="mt-6 text-muted">No store connected yet. Go to <span className="text-brand">Stores</span> to connect one.</p>
+        <div className="app-card mt-6">
+          <p className="text-fog/60">
+            No store connected yet. Go to{' '}
+            <Link href="/stores" className="app-link">Stores</Link> to connect one.
+          </p>
+        </div>
       )}
     </div>
   );

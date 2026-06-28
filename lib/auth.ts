@@ -2,6 +2,7 @@ import type { NextAuthOptions } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
+import { Types } from 'mongoose';
 import { connectDB } from '@/lib/db/connect';
 import { User } from '@/models/User';
 import { Organization } from '@/models/Organization';
@@ -9,7 +10,7 @@ import { Organization } from '@/models/Organization';
 export const authOptions: NextAuthOptions = {
   session: { strategy: 'jwt' },
   secret: process.env.NEXTAUTH_SECRET,
-  pages: { signIn: '/login' },
+  pages: { signIn: '/login', error: '/login' },
   providers: [
     Credentials({
       name: 'credentials',
@@ -41,22 +42,34 @@ export const authOptions: NextAuthOptions = {
     // On Google sign-in, create a User + Organization the first time we see them.
     async signIn({ user, account }) {
       if (account?.provider !== 'google') return true;
-      await connectDB();
-      const existing = await User.findOne({ email: user.email?.toLowerCase() });
-      if (existing) return true;
-      const newUser = new User({
-        organizationId: undefined,
-        name: user.name ?? 'Merchant',
-        email: user.email!.toLowerCase(),
-        provider: 'google',
-        googleId: (account.providerAccountId as string) ?? undefined,
-        image: user.image ?? undefined,
-        emailVerified: true,
-      });
-      const org = await Organization.create({ name: `${newUser.name}'s org`, ownerId: newUser._id, plan: 'starter' });
-      newUser.organizationId = org._id;
-      await newUser.save();
-      return true;
+      if (!user.email) return false;
+      try {
+        await connectDB();
+        const existing = await User.findOne({ email: user.email.toLowerCase() });
+        if (existing) return true;
+
+        const newUser = new User({
+          name: user.name ?? 'Merchant',
+          email: user.email.toLowerCase(),
+          provider: 'google',
+          googleId: account.providerAccountId ?? undefined,
+          image: user.image ?? undefined,
+          emailVerified: true,
+          // placeholder — replaced before save
+          organizationId: new Types.ObjectId(),
+        });
+        const org = await Organization.create({
+          name: `${newUser.name}'s org`,
+          ownerId: newUser._id,
+          plan: 'starter',
+        });
+        newUser.organizationId = org._id;
+        await newUser.save();
+        return true;
+      } catch (err) {
+        console.error('Google sign-in failed:', err);
+        return false;
+      }
     },
     async jwt({ token, user }) {
       if (user) {
